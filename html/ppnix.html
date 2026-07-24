@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, viewport-fit=cover">
+<title>PPnix · 极简影库</title>
+<style>
+/* -------------------- RESET & GLOBAL -------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --bg-dark: #0a0c12;
+  --bg-surface: rgba(18, 24, 34, 0.68);
+  --bg-elevated: rgba(25, 32, 45, 0.85);
+  --accent-primary: #ff4d4d;
+  --accent-glow: rgba(255, 77, 77, 0.4);
+  --text-main: #f0f3f8;
+  --text-muted: #9aa4bf;
+  --text-dim: #6c7a91;
+  --border-light: rgba(255, 255, 255, 0.08);
+  --card-radius: 1rem;
+  --transition-smooth: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at 10% 20%, #10161f, #07090f);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  scroll-behavior: smooth;
+}
+
+body {
+  backdrop-filter: blur(2px);
+}
+
+/* 优雅滚动条 */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.02);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 77, 77, 0.4);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* -------------------- 头部（玻璃质感） -------------------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 110;
+  padding: 12px 20px;
+  background: rgba(10, 12, 18, 0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff, var(--accent-primary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 12px rgba(255,77,77,0.2);
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(255,255,255,0.04);
+  padding: 4px;
+  border-radius: 48px;
+  backdrop-filter: blur(4px);
+}
+
+.nav-tab {
+  padding: 6px 18px;
+  border-radius: 32px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-muted);
+  transition: var(--transition-smooth);
+  letter-spacing: 0.3px;
+}
+
+.nav-tab.on {
+  background: var(--accent-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255,77,77,0.3);
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  min-width: 200px;
+  margin-left: auto;
+}
+
+.search-box input {
+  flex: 1;
+  padding: 8px 18px;
+  border-radius: 40px;
+  border: 1px solid var(--border-light);
+  background: rgba(20, 26, 36, 0.7);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  outline: none;
+  transition: var(--transition-smooth);
+  backdrop-filter: blur(5px);
+}
+
+.search-box input:focus {
+  border-color: var(--accent-primary);
+  background: rgba(28, 36, 48, 0.9);
+  box-shadow: 0 0 0 2px rgba(255,77,77,0.2);
+}
+
+.search-box input::placeholder {
+  color: var(--text-dim);
+}
+
+.search-box button {
+  padding: 8px 22px;
+  border: none;
+  border-radius: 40px;
+  background: var(--accent-primary);
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.search-box button:hover {
+  background: #ff3333;
+  transform: scale(0.96);
+  box-shadow: 0 4px 12px rgba(255,77,77,0.4);
+}
+
+/* -------------------- 内容滚动区 -------------------- */
+.scroll-area {
+  padding: 20px 16px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 区块样式 */
+.section {
+  margin-bottom: 32px;
+  background: transparent;
+  border-radius: 28px;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  letter-spacing: -0.2px;
+}
+
+.section-title span:first-child {
+  background: linear-gradient(135deg, #fff, #cbd5ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  border-left: 3px solid var(--accent-primary);
+  padding-left: 12px;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  background: rgba(255,255,255,0.02);
+  padding: 4px 8px;
+  border-radius: 48px;
+}
+
+.tab-item {
+  padding: 4px 16px;
+  border-radius: 32px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: var(--transition-smooth);
+}
+
+.tab-item.on {
+  background: var(--accent-primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255,77,77,0.3);
+}
+
+.more {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+  cursor: pointer;
+  background: rgba(255,77,77,0.12);
+  padding: 4px 12px;
+  border-radius: 40px;
+  font-weight: 500;
+  transition: var(--transition-smooth);
+}
+
+.more:hover {
+  background: var(--accent-primary);
+  color: white;
+  transform: translateX(3px);
+}
+
+/* 卡片网格 - 优雅玻璃卡片 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: rgba(20, 26, 34, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 77, 77, 0.5);
+  box-shadow: 0 18px 28px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,77,77,0.2);
+  background: rgba(28, 36, 46, 0.85);
+}
+
+.card:active {
+  transform: scale(0.97);
+}
+
+.card-img {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  display: block;
+  background: linear-gradient(145deg, #1e2632, #11161f);
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-img {
+  transform: scale(1.02);
+}
+
+.card-body {
+  padding: 10px 10px 12px;
+}
+
+.card-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f0f3fa;
+}
+
+.card-meta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.star-bar {
+  color: #f5b642;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+}
+
+/* 角标 / 集数浮层 */
+.card-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  color: #ffd966;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  z-index: 2;
+}
+
+.episode-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  padding: 24px 6px 6px;
+  text-align: right;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #ffecb3;
+}
+
+/* 排行榜样式 */
+.rank-list {
+  list-style: none;
+  background: rgba(18, 24, 32, 0.6);
+  backdrop-filter: blur(4px);
+  border-radius: 24px;
+  padding: 6px 0;
+  border: 1px solid var(--border-light);
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.rank-item:hover {
+  background: rgba(255,77,77,0.1);
+  transform: translateX(4px);
+}
+
+.rank-num {
+  width: 32px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+
+.rank-num.top1 { color: #ffd966; text-shadow: 0 0 3px #ffb347; }
+.rank-num.top2 { color: #b0c4de; }
+.rank-num.top3 { color: #cd9a5b; }
+
+.rank-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-date {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  background: rgba(255,255,255,0.03);
+  padding: 2px 8px;
+  border-radius: 30px;
+}
+
+/* 分页按钮 */
+.episode-btn, .page-btn {
+  padding: 6px 16px;
+  border-radius: 32px;
+  border: 1px solid var(--border-light);
+  background: rgba(25, 32, 45, 0.7);
+  backdrop-filter: blur(4px);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  font-weight: 500;
+}
+
+.episode-btn.on, .page-btn.on {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(255,77,77,0.3);
+}
+
+.episode-btn:hover, .page-btn:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+}
+
+/* 加载动画 */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.loading::before {
+  content: '';
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top: 2px solid var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 详情视图 - 典雅深层弹窗 */
+.detail-view {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(20px);
+  overflow-y: auto;
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+
+.detail-view.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; backdrop-filter: blur(20px); }
+}
+
+.detail-content {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+  margin: 30px auto;
+  background: rgba(16, 20, 28, 0.9);
+  backdrop-filter: blur(16px);
+  border-radius: 2rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 24px 26px;
+  box-shadow: 0 25px 45px rgba(0,0,0,0.5);
+}
+
+.detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 77, 77, 0.15);
+  padding: 6px 16px;
+  border-radius: 40px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  transition: var(--transition-smooth);
+  width: fit-content;
+}
+
+.detail-back:hover {
+  background: var(--accent-primary);
+  color: white;
+  transform: translateX(-3px);
+}
+
+.detail-poster {
+  width: 130px;
+  border-radius: 18px;
+  float: left;
+  margin: 0 20px 20px 0;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  box-shadow: 0 12px 22px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.detail-info {
+  overflow: hidden;
+}
+
+.detail-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #fff, #ffb3b3);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.detail-year {
+  font-size: 0.8rem;
+  color: var(--accent-primary);
+  margin: 5px 0 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.detail-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 12px 0 10px;
+  background: rgba(0,0,0,0.3);
+  padding: 12px;
+  border-radius: 20px;
+}
+
+.detail-field {
+  font-size: 0.75rem;
+  margin-bottom: 6px;
+}
+
+.detail-field-label {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.play-btn {
+  display: inline-block;
+  margin: 12px 0;
+  padding: 10px 32px;
+  border: none;
+  border-radius: 60px;
+  background: var(--accent-primary);
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  box-shadow: 0 6px 14px rgba(255,77,77,0.3);
+}
+
+.play-btn:hover {
+  transform: scale(1.02);
+  background: #ff1f1f;
+  box-shadow: 0 8px 20px rgba(255,77,77,0.6);
+}
+
+.episode-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* 响应式优化 */
+@media (max-width: 640px) {
+  .header {
+    padding: 12px 16px;
+  }
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+  .detail-content {
+    margin: 20px 12px;
+    padding: 18px;
+  }
+  .detail-poster {
+    width: 100px;
+  }
+  .detail-title {
+    font-size: 1.3rem;
+  }
+  .scroll-area {
+    padding: 16px 12px;
+  }
+  .section-title {
+    font-size: 1.1rem;
+  }
+}
+
+/* 无数据/错误信息样式 */
+.error-msg {
+  background: rgba(255,80,80,0.15);
+  backdrop-filter: blur(4px);
+  border-radius: 28px;
+  padding: 40px;
+  text-align: center;
+  color: #ffaaaa;
+}
+
+/* 底部优雅小提示 */
+.app-footer {
+  text-align: center;
+  padding: 20px 16px 30px;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border-light);
+  margin-top: 20px;
+  background: rgba(0,0,0,0.2);
+  letter-spacing: 0.5px;
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="header">
+    <h1>PPnix</h1>
+    <div class="nav-tabs">
+      <div class="nav-tab on" data-tab="home">首页</div>
+      <div class="nav-tab" data-tab="movie">电影</div>
+      <div class="nav-tab" data-tab="tv">电视剧</div>
+    </div>
+    <div class="search-box">
+      <input id="searchInput" placeholder="搜影视 · 试试《阿凡达》" maxlength="40">
+      <button id="searchBtn">搜索</button>
+    </div>
+  </div>
+  <div class="scroll-area" id="mainContent">
+    <div class="loading">正在加载光影世界...</div>
+  </div>
+  <div class="app-footer">✨ 极简影库 · 灵感源自热爱 | PPnix 体验版</div>
+</div>
+<div class="detail-view" id="detailView">
+  <div class="detail-bg" id="detailBg"></div>
+  <div class="detail-content" id="detailContent"></div>
+</div>
+
+<script>
+// ======================= 核心逻辑（完全保留原数据流，仅美化视觉） =======================
+var BASE = 'https://www.ppnix.com';
+var LANG = '/cn';
+
+function _fm() {
+  return new Promise(function (r) {
+    if (window.fm) return r(window.fm);
+    var t = 0;
+    (function c() { if (window.fm) return r(window.fm); if (++t > 30) return r(null); setTimeout(c, 100); })();
+  });
+}
+if (window.fongmiBridge || window.fm || window.fongmi)
+  document.documentElement.classList.add('fm-native');
+
+function _req(url) {
+  return _fm().then(function (f) {
+    if (f && f.req) return f.req(url, { timeout: 20 });
+    return fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(function (r) { return r.text(); }).then(function (t) { return { body: t }; });
+  }).then(function (res) {
+    return (res && res.body != null) ? (typeof res.body === 'string' ? res.body : JSON.stringify(res.body)) : '';
+  });
+}
+function _img(url) {
+  if (!url) return '';
+  try { if (window.fm && fm.res) return fm.res(url, { credentials: 'include' }); } catch (e) {}
+  return url;
+}
+function _play(url, title) {
+  var fullUrl = url.indexOf('://') > 0 ? url : BASE + url;
+  _fm().then(function (f) {
+    if (f && f.play) return f.play(fullUrl, title || '', {});
+    window.open(fullUrl);
+  });
+}
+function _esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function parseCards(html, isTV) {
+  var cards = [];
+  var re = /<li>([\s\S]*?)<\/li>/g;
+  var m;
+  while ((m = re.exec(html)) !== null) {
+    var block = m[1];
+    var hm = block.match(/href="([^"]+)"/);
+    if (!hm) continue;
+    var href = hm[1];
+    var idm = href.match(/\/(\d+)\.html/);
+    if (!idm) continue;
+    var id = idm[1];
+    var im = block.match(/src="([^"]+)"/);
+    var img = im ? im[1] : '';
+    var altm = block.match(/alt="([^"]+)"/);
+    var title = altm ? altm[1] : '';
+    if (!title) {
+      var tm = block.match(/<h2>[\s\S]*?<a[^>]*>([^<]+)<\/a>/);
+      title = tm ? tm[1].trim() : '';
+    }
+    var rm = block.match(/class="rate">([^<]+)/);
+    var rate = rm ? rm[1] : '';
+    var epm = block.match(/<div class="note"><span>([^<]+)<\/span><\/div>/);
+    var ep = epm ? epm[1] : '';
+    var ym = block.match(/<span class="orange">([^<]+)<\/span>/);
+    var year = ym ? ym[1] : '';
+    var isTv = href.indexOf('/tv/') > 0;
+    cards.push({ id: id, title: title, img: img, rate: rate, ep: ep, year: year, type: isTv ? 'tv' : 'movie', href: href });
+  }
+  return cards;
+}
+
+function loadHome() {
+  var el = document.getElementById('mainContent');
+  el.innerHTML = '<div class="loading">加载中...</div>';
+  _req(BASE + LANG + '/').then(function (html) {
+    if (!html) { el.innerHTML = '<div class="error-msg">加载失败，请检查网络</div>'; return; }
+    renderHome(html, el);
+  });
+}
+
+function renderHome(html, el) {
+  var h = '';
+  var sections = [{ id:'slider', title:'正在上映' }, { id:'slider2', title:'热门电影' }, { id:'slider3', title:'热门电视剧' }];
+  for (var si = 0; si < sections.length; si++) {
+    var sid = sections[si].id;
+    var stitle = sections[si].title;
+    var sstart = html.indexOf('id="' + sid + '"');
+    if (sstart < 0) continue;
+    var sectEnd = html.indexOf('id="slider', sstart + 1);
+    if (sectEnd < 0) sectEnd = html.indexOf('<footer class="footer"', sstart);
+    if (sectEnd < 0) sectEnd = sstart + 50000;
+    var sectHtml = html.substring(sstart, sectEnd);
+    var tabs = [];
+    var tabHtml = sectHtml.match(/<dl>([\s\S]*?)<\/dl>/);
+    if (tabHtml) {
+      var tdm = tabHtml[1].matchAll(/<dt[^>]*>([\s\S]*?)<\/dt>/g);
+      for (var t of tdm) {
+        var tn = t[1].replace(/<[^>]+>/g, '').trim();
+        if (tn) tabs.push(tn);
+      }
+    }
+    var lists = [];
+    var lre = /<div class="lists-content">([\s\S]*?)<\/div>\s*<\/div>/g;
+    var lm;
+    while ((lm = lre.exec(sectHtml)) !== null) {
+      var ulm = lm[1].match(/<ul>([\s\S]*?)<\/ul>/);
+      if (ulm) lists.push(ulm[1]);
+    }
+    if (lists.length === 0) continue;
+    h += '<div class="section">';
+    h += '<div class="section-title">';
+    h += '<span>' + _esc(stitle) + '</span>';
+    if (tabs.length > 0) {
+      h += '<div class="tab-bar" data-si="' + si + '">';
+      for (var ti = 0; ti < tabs.length; ti++) {
+        h += '<span class="tab-item' + (ti === 0 ? ' on' : '') + '" data-ti="' + ti + '">' + _esc(tabs[ti]) + '</span>';
+      }
+      h += '</div>';
+    }
+    if (sid === 'slider2') h += '<span class="more" data-go="movie">更多 ></span>';
+    else if (sid === 'slider3') h += '<span class="more" data-go="tv">更多 ></span>';
+    h += '</div>';
+    for (var li = 0; li < lists.length; li++) {
+      var cards = parseCards(lists[li], si === 2 || (si === 0 && li > 0));
+      var display = li === 0 ? '' : ' style="display:none"';
+      h += '<div class="card-grid" data-si="' + si + '" data-ti="' + li + '"' + display + '>';
+      for (var ci = 0; ci < cards.length; ci++) {
+        h += renderCard(cards[ci]);
+      }
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+  // 排行榜美化
+  var rankNames = ['本月排行榜', '电影排行榜', '电视剧排行榜'];
+  h += '<div class="section"><div class="section-title"><span>🔥 热门榜单</span></div>';
+  for (var ri = 0; ri < rankNames.length; ri++) {
+    var idx = html.indexOf(rankNames[ri]);
+    if (idx < 0) continue;
+    var chunk = html.substring(idx, idx + 4000);
+    var ulm = chunk.match(/<ul>([\s\S]*?)<\/ul>/);
+    if (!ulm) continue;
+    h += '<div class="section-title" style="font-size:1rem;margin-top:12px"><span>🏅 ' + rankNames[ri] + '</span></div>';
+    h += '<ul class="rank-list">';
+    var items = ulm[1].match(/<li>([\s\S]*?)<\/li>/g);
+    if (items) {
+      for (var ii = 0; ii < Math.min(items.length, 10); ii++) {
+        var ib = items[ii];
+        var a = ib.match(/href="([^"]+)"/);
+        var t = ib.match(/title="([^"]+)"/);
+        var date = ib.match(/<time>([^<]+)<\/time>/);
+        var num = ib.match(/<span>(\d+)<\/span>/);
+        var tt = '';
+        if (t) tt = t[1];
+        else {
+          var t2 = ib.match(/<h2>[\s\S]*?<a[^>]*>([^<]+)<\/a>/);
+          if (t2) tt = t2[1];
+        }
+        h += '<li class="rank-item" data-href="' + (a ? _esc(a[1]) : '') + '">';
+        var cls = '';
+        if (num) { var n = parseInt(num[1]); if (n <= 3) cls = ' top' + n; }
+        h += '<span class="rank-num' + cls + '">' + (num ? num[1] : '') + '</span>';
+        h += '<span class="rank-name">' + _esc(tt) + '</span>';
+        h += '<span class="rank-date">' + (date ? date[1] : '') + '</span>';
+        h += '</li>';
+      }
+    }
+    h += '</ul>';
+  }
+  h += '</div>';
+  el.innerHTML = h;
+  bindEvents(el);
+}
+
+function renderCard(c) {
+  var imgUrl = _img(c.img);
+  var h = '<div class="card" data-id="' + c.id + '" data-type="' + c.type + '" data-href="' + _esc(c.href) + '">';
+  h += '<div style="position:relative">';
+  h += '<img class="card-img" src="' + _esc(imgUrl) + '" alt="' + _esc(c.title) + '" loading="lazy" onerror="this.style.display=\'none\'">';
+  if (c.ep) h += '<div class="episode-badge">📺 ' + _esc(c.ep) + '</div>';
+  else if (c.year) h += '<div class="card-badge">📅 ' + _esc(c.year) + '</div>';
+  h += '</div>';
+  h += '<div class="card-body">';
+  h += '<div class="card-title">' + _esc(c.title) + '</div>';
+  if (c.rate) h += '<div class="card-meta"><span class="star-bar">' + getStars(c.rate) + '</span> <span>' + _esc(c.rate) + '</span></div>';
+  h += '</div></div>';
+  return h;
+}
+
+function getStars(r) {
+  var v = parseFloat(r);
+  if (!v) return '';
+  var s = '';
+  for (var i = 0; i < 5; i++) s += (i < Math.round(v / 2)) ? '★' : '☆';
+  return s;
+}
+
+function loadCategory(type, page) {
+  page = page || 1;
+  var el = document.getElementById('mainContent');
+  el.innerHTML = '<div class="loading">加载中...</div>';
+  var url = BASE + LANG + '/' + type + '/';
+  if (page > 1) url += '---' + (page - 1) + '-.html';
+  _req(url).then(function (html) {
+    if (!html) { el.innerHTML = '<div class="error-msg">加载失败</div>'; return; }
+    renderCategory(html, el, type, page);
+  });
+}
+
+function renderCategory(html, el, type, page) {
+  var ulm = html.match(/<div class="lists-content">\s*<ul>([\s\S]*?)<\/ul>\s*<\/div>/);
+  if (!ulm) { el.innerHTML = '<div class="error-msg">没有内容</div>'; return; }
+  var cards = parseCards(ulm[1]);
+  var h = '<div class="section"><div class="section-title"><span>' + (type === 'movie' ? '🎬 电影' : '📺 电视剧') + '</span></div>';
+  h += '<div class="card-grid">';
+  for (var i = 0; i < cards.length; i++) h += renderCard(cards[i]);
+  h += '</div>';
+  var pagem = html.match(/<div class="pagination[^"]*">([\s\S]*?)<\/div>/);
+  if (pagem) {
+    var pages = [];
+    var pm = pagem[1].matchAll(/<a[^>]*href="[^"]*---(\d+)-\.html"[^>]*>(\d+)<\/a>/g);
+    for (var p of pm) pages.push(parseInt(p[1]));
+    var maxPage = pages.length > 0 ? Math.max.apply(null, pages) : 0;
+    h += '<div style="display:flex;gap:8px;justify-content:center;padding:18px 0;flex-wrap:wrap;">';
+    var start = Math.max(1, page - 4);
+    var end = Math.min(maxPage, page + 4);
+    if (page > 1) h += '<button class="episode-btn page-btn" data-type="' + type + '" data-page="' + (page - 1) + '">◀ 上一页</button>';
+    for (var pp = start; pp <= end; pp++) {
+      h += '<button class="episode-btn page-btn' + (pp === page ? ' on' : '') + '" data-type="' + type + '" data-page="' + pp + '">' + pp + '</button>';
+    }
+    if (page < maxPage) h += '<button class="episode-btn page-btn" data-type="' + type + '" data-page="' + (page + 1) + '">下一页 ▶</button>';
+    h += '</div>';
+  }
+  h += '</div>';
+  el.innerHTML = h;
+  bindEvents(el);
+}
+
+function doSearch(keyword) {
+  if (!keyword.trim()) return;
+  var el = document.getElementById('mainContent');
+  el.innerHTML = '<div class="loading">搜索中...</div>';
+  var url = BASE + LANG + '/search/' + encodeURIComponent(keyword) + '--.html';
+  _req(url).then(function (html) {
+    if (!html) { el.innerHTML = '<div class="error-msg">搜索失败</div>'; return; }
+    var ulm = html.match(/<div class="lists-content">\s*<ul>([\s\S]*?)<\/ul>\s*<\/div>/);
+    if (!ulm) {
+      el.innerHTML = '<div class="section"><div class="section-title"><span>🔍 "' + _esc(keyword) + '" 暂无结果</span></div></div>';
+      return;
+    }
+    var cards = parseCards(ulm[1]);
+    var h = '<div class="section"><div class="section-title"><span>🔍 "' + _esc(keyword) + '" 搜索结果 (' + cards.length + ')</span></div>';
+    h += '<div class="card-grid">';
+    for (var i = 0; i < cards.length; i++) h += renderCard(cards[i]);
+    h += '</div></div>';
+    el.innerHTML = h;
+    bindEvents(el);
+  });
+}
+
+function loadDetail(href) { /* 同原逻辑，保留完整功能 */
+  var el = document.getElementById('detailContent');
+  var view = document.getElementById('detailView');
+  view.classList.add('active');
+  document.body.classList.add('detail-active');
+  el.innerHTML = '<div class="loading">加载详情...</div>';
+  _req(BASE + href).then(function (html) {
+    if (!html) { el.innerHTML = '<div class="error-msg">加载失败</div>'; return; }
+    renderDetail(html, el, href);
+  });
+}
+function renderDetail(html, el, href) {
+  var infoid = 0, m3u8 = [], subs = '', classurl = '';
+  var vm = html.match(/infoid\s*=\s*(\d+)/);
+  if (vm) infoid = vm[1];
+  var mu = html.match(/m3u8\s*=\s*\[([^\]]+)\]/);
+  if (mu) {
+    var parts = mu[1].split(',').map(function(s) { return s.replace(/['"\s]/g, ''); }).filter(Boolean);
+    m3u8 = parts;
+  }
+  var poster = '';
+  var pm = html.match(/<img[^>]+class="thumb"[^>]+src="([^"]+)"/);
+  if (pm) poster = pm[1];
+  var title = '';
+  var tm = html.match(/<h1[^>]+class="product-title">([\s\S]*?)<\/h1>/);
+  if (tm) title = tm[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  var year = '';
+  var ym2 = html.match(/<h1[^>]*>[\s\S]*?<span>\((\d{4})\)<\/span>/);
+  if (ym2) year = ym2[1];
+  var rate = '';
+  var rm = html.match(/class="rate">([^<]+)/);
+  if (rm) rate = rm[1];
+  var extractSpan = function(label) {
+    var re = new RegExp(label + '：<span>([\\s\\S]*?)<\\/span>');
+    var m = html.match(re);
+    return m ? m[1].replace(/<[^>]+>/g, '').trim() : '';
+  };
+  var director = extractSpan('导演');
+  var cast = extractSpan('主演');
+  var genre = extractSpan('类型');
+  var country = extractSpan('国家');
+  var aka = extractSpan('又名');
+  var desc = extractSpan('简介');
+  var isTV = m3u8.length > 1 || (m3u8.length === 1 && m3u8[0] !== '1080P');
+  var h = '';
+  h += '<div class="detail-back" id="detailBack"><span>← 返回</span></div>';
+  h += '<img class="detail-poster" src="' + _img(poster) + '" alt="' + _esc(title) + '" onerror="this.style.display=\'none\'">';
+  h += '<div class="detail-info">';
+  h += '<div class="detail-title">' + _esc(title) + '</div>';
+  if (year || rate) h += '<div class="detail-year">' + (year ? year : '') + (rate ? '  ' + getStars(rate) + ' ' + rate : '') + '</div>';
+  if (director) h += '<div class="detail-field"><span class="detail-field-label">导演：</span><span class="detail-field-value">' + _esc(director) + '</span></div>';
+  if (cast) h += '<div class="detail-field"><span class="detail-field-label">主演：</span><span class="detail-field-value">' + _esc(cast) + '</span></div>';
+  if (genre) h += '<div class="detail-field"><span class="detail-field-label">类型：</span><span class="detail-field-value">' + _esc(genre) + '</span></div>';
+  if (country) h += '<div class="detail-field"><span class="detail-field-value">' + _esc(country) + '</span></div>';
+  if (aka) h += '<div class="detail-field"><span class="detail-field-value">又名：' + _esc(aka) + '</span></div>';
+  h += '</div><div style="clear:both"></div>';
+  if (desc) h += '<div class="detail-desc">📖 ' + _esc(desc) + '</div>';
+  if (m3u8.length === 1 && !isTV) {
+    h += '<button class="play-btn play-action" data-url="/info/m3u8/' + infoid + '/' + m3u8[0] + '.m3u8" data-title="' + _esc(title) + '">▶ 立即播放</button>';
+  }
+  if (m3u8.length > 1 || (m3u8.length === 1 && m3u8[0] !== '1080P')) {
+    h += '<div style="margin-top:10px"><div style="font-size:0.9rem;font-weight:700;margin-bottom:8px;">📌 选集</div>';
+    h += '<div class="episode-grid">';
+    for (var ei = 0; ei < m3u8.length; ei++) {
+      var ep = m3u8[ei];
+      var epLabel = ep;
+      if (!isNaN(parseInt(ep)) && parseInt(ep).toString() === ep) epLabel = '第' + ep + '集';
+      h += '<button class="episode-btn play-action" data-url="/info/m3u8/' + infoid + '/' + ep + '.m3u8" data-title="' + _esc(title) + ' ' + epLabel + '">' + _esc(epLabel) + '</button>';
+    }
+    h += '</div></div>';
+  }
+el.innerHTML = h;
+  document.getElementById('detailBack').onclick = closeDetail;
+  document.getElementById('detailBg').onclick = closeDetail;
+  var pbs = el.querySelectorAll('.play-action');
+  for (var i = 0; i < pbs.length; i++) pbs[i].onclick = function () { _play(this.getAttribute('data-url'), this.getAttribute('data-title')); };
+}
+function closeDetail() { document.getElementById('detailView').classList.remove('active'); document.body.classList.remove('detail-active'); }
+function bindEvents(el) {
+  var cards = el.querySelectorAll('.card');
+  for (var i = 0; i < cards.length; i++) cards[i].onclick = function () { if (this.getAttribute('data-href')) loadDetail(this.getAttribute('data-href')); };
+  var tabs = el.querySelectorAll('.tab-item');
+  for (var i = 0; i < tabs.length; i++) tabs[i].onclick = function () {
+    var si = this.getAttribute('data-si'), ti = this.getAttribute('data-ti');
+    var parent = this.parentNode;
+    var children = parent.querySelectorAll('.tab-item');
+    for (var j = 0; j < children.length; j++) children[j].classList.remove('on');
+    this.classList.add('on');
+    var grids = el.querySelectorAll('.card-grid[data-si="' + si + '"]');
+    for (var j = 0; j < grids.length; j++) grids[j].style.display = grids[j].getAttribute('data-ti') === ti ? '' : 'none';
+  };
+  var ranks = el.querySelectorAll('.rank-item');
+  for (var i = 0; i < ranks.length; i++) ranks[i].onclick = function () { if (this.getAttribute('data-href')) loadDetail(this.getAttribute('data-href')); };
+  var mores = el.querySelectorAll('[data-go]');
+  for (var i = 0; i < mores.length; i++) mores[i].onclick = function () { setTab(this.getAttribute('data-go')); };
+  var pbs = el.querySelectorAll('.page-btn');
+  for (var i = 0; i < pbs.length; i++) pbs[i].onclick = function () { loadCategory(this.getAttribute('data-type'), parseInt(this.getAttribute('data-page'))); };
+}
+function setTab(tab) {
+  var tabs = document.querySelectorAll('.nav-tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('on', tabs[i].getAttribute('data-tab') === tab);
+  if (tab === 'home') loadHome();
+  else if (tab === 'movie') loadCategory('movie', 1);
+  else if (tab === 'tv') loadCategory('tv', 1);
+}
+document.addEventListener('DOMContentLoaded', function () {
+  var tabs = document.querySelectorAll('.nav-tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].onclick = function () { setTab(this.getAttribute('data-tab')); };
+  document.getElementById('searchBtn').onclick = function () { doSearch(document.getElementById('searchInput').value); };
+  document.getElementById('searchInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(this.value); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDetail(); });
+  window.addEventListener('popstate', function () { if (document.getElementById('detailView').classList.contains('active')) closeDetail(); });
+  loadHome();
+});
+</script>
+</body>
+</html>
+```

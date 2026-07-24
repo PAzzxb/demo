@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare Worker 接口调用示例</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f5f7fb;
+            padding: 2rem;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.85;
+            font-size: 0.95rem;
+        }
+
+        .content-area {
+            padding: 2rem;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #3b82f6;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .info-card code {
+            background: #e2e8f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-family: 'Courier New', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-left: 4px solid #ef4444;
+        }
+
+        button {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🌐 Worker 接口展示</h1>
+        <p>调用 <code style="background: rgba(255,255,255,0.2); padding: 0.2rem 0.5rem; border-radius: 8px;">/zh-CN/</code> 并显示返回内容</p>
+    </div>
+    <div class="content-area">
+        <div class="info-card">
+            📡 请求地址：<code>https://late-breeze-ca23.319917279.workers.dev/zh-CN/</code>
+        </div>
+        <div class="status" id="statusMsg">
+            <div class="spinner"></div>
+            <span>正在加载数据...</span>
+        </div>
+        <div class="result" id="resultBox">
+            等待响应内容...
+        </div>
+        <button id="refreshBtn">🔄 重新请求</button>
+    </div>
+    <footer>
+        ⚡ 由 Cloudflare Worker 提供数据 | 前端使用 fetch API 调用
+    </footer>
+</div>
+
+<script>
+    const WORKER_URL = 'https://late-breeze-ca23.319917279.workers.dev/zh-CN/';
+    const statusDiv = document.getElementById('statusMsg');
+    const resultBox = document.getElementById('resultBox');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    async function fetchWorkerData() {
+        // 显示加载状态
+        statusDiv.innerHTML = `
+            <div class="spinner"></div>
+            <span>正在加载数据...</span>
+        `;
+        resultBox.innerHTML = '⏳ 请求中，请稍候...';
+        resultBox.classList.remove('error');
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒超时
+
+            const response = await fetch(WORKER_URL, {
+                method: 'GET',
+                signal: controller.signal,
+                headers: {
+                    'Accept': 'text/html,text/plain,application/json,*/*'
+                }
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            // 获取响应文本（支持 HTML / 纯文本 / JSON 字符串）
+            const contentType = response.headers.get('content-type') || '';
+            let data;
+
+            if (contentType.includes('application/json')) {
+                const json = await response.json();
+                data = JSON.stringify(json, null, 2);
+            } else {
+                data = await response.text();
+            }
+
+            // 如果返回内容为空字符串
+            if (data === undefined || data === '') {
+                data = '⚠️ 接口返回了空内容';
+            }
+
+            resultBox.innerHTML = escapeHtml(data);
+            statusDiv.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #10b981"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>加载成功 (${new Date().toLocaleTimeString()})</span>
+            `;
+        } catch (error) {
+            console.error('Worker 调用失败:', error);
+            let errorMsg = error.message;
+            if (error.name === 'AbortError') {
+                errorMsg = '请求超时，请检查 Worker 地址或网络连接';
+            }
+            resultBox.innerHTML = `❌ 调用失败：${escapeHtml(errorMsg)}<br><br>💡 可能原因：<br>- Worker 未正确响应 CORS 头<br>- 接口地址错误或服务不可用<br>- 网络问题`;
+            resultBox.classList.add('error');
+            statusDiv.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ef4444"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <span>请求失败</span>
+            `;
+        }
+    }
+
+    // 简单的防XSS转义
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // 页面加载和点击按钮时调用
+    fetchWorkerData();
+    refreshBtn.addEventListener('click', fetchWorkerData);
+</script>
+</body>
+</html>
