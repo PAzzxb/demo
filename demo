@@ -1596,13 +1596,6 @@
             "ext": "./lib/zbzdb.json"
         },
         {
-            "key": "追更助手",
-            "name": "♫『追更助手』[Html]",
-            "type": 3,
-            "api": "csp_zgzs",
-            "homePage": "./html/追更助手.html"
-        },
-        {
             "key": "影视库库",
             "name": "♫『Media Archive_V2』[Html]",
             "type": 3,
@@ -1618,14 +1611,14 @@
         },
         {
             "key": "油罐",
-            "name": "♫『youtube 站源』[Html]",
+            "name": "♫『youtube』[Html]",
             "type": 3,
             "api": "csp_youtube",
             "homePage": "https://yt.9988526.xyz/"
         },
         {
             "key": "bilibili ",
-            "name": "♫『bilibili 站源』[Html]",
+            "name": "♫『bilibili』[Html]",
             "type": 3,
             "api": "csp_bili",
             "homePage": "https://bili-1k4.pages.dev/"
@@ -1636,13 +1629,6 @@
             "type": 3,
             "api": "csp_4kzn",
             "homePage": "https://pl-d8z.pages.dev/"
-        },
-        {
-            "key": "youtube",
-            "name": "♫『youtube』[Html]",
-            "type": 3,
-            "api": "csp_youtube",
-            "homePage": "./youtube.html"
         },
         {
             "key": "Nostrwhos",
@@ -1681,7 +1667,7 @@
         },
         {
             "key": "lmm_webhome.html",
-            "name": "♫『路漫漫_webhome』[Html]",
+            "name": "♫『路漫漫』[Html]",
             "type": 3,
             "api": "csp_lmm",
             "homePage": "./html/lmm_webhome.html"
@@ -1699,13 +1685,6 @@
             "type": 3,
             "api": "csp_wanou",
             "homePage": "./html/wogg.html"
-        },
-        {
-            "key": "pomo.html",
-            "name": "♫『POMO』[Html]",
-            "type": 3,
-            "api": "csp_pomo",
-            "homePage": "https://18746.kstore.space/pomo-cyberpunk.html"
         },
         {
             "key": "video",
