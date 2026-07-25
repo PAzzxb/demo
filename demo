@@ -7,11 +7,12 @@
     "danmaku": "http://127.0.0.1:9978/proxy?do=danmaku&name={name}&episode={episode}",
     "sites": [
         {
-           "key":"js_豆瓣",
-           "name":"♫『豆瓣｜首页』[首页]",
-           "type":3,
-           "api":"./js/drpy2.min.js",
-           "ext":"./js/douban.js"
+            "key": "豆瓣",
+            "name": "♫『豆瓣｜首页』[首页]",
+            "type": 3,
+            "jar": "./jar/v.jar",
+            "api": "csp_Douban",
+            "searchable": 0
         },
         {
             "key": "本地",
