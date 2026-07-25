@@ -11,7 +11,7 @@
            "name":"♫『豆瓣｜首页』[首页]",
            "type":3,
            "api":"./js/drpy2.min.js",
-           "ext":"./js/drpy.js"
+           "ext":"./js/douban.js"
         },
         {
             "key": "本地",
