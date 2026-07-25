@@ -10,8 +10,8 @@
             "key": "豆瓣",
             "name": "♫『豆瓣｜首页』[首页]",
             "type": 3,
-            "jar": "./jar/v.jar",
             "api": "csp_Douban",
+            "jar": "./jar/v.jar",
             "searchable": 0
         },
         {
