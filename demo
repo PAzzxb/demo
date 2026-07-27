@@ -11,7 +11,7 @@
             "name": "♫『豆瓣｜首页』[首页]",
             "type": 3,
             "api": "csp_Douban",
-            "jar": "./jar/v.php",
+            "jar": "https://gh-proxy.org/https://raw.githubusercontent.com/PAzzxb/demo/refs/heads/main/v.jar",
             "searchable": 0
         },
         {
