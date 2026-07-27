@@ -9,7 +9,7 @@
         {
             "key": "tmdb兼容",
             "name": "♫『TMDB电视兼容』[HTML]",
-            "api": "csp_LocalFile"
+            "api": "csp_LocalFile",
             "homePage": "./html/tmdb电视兼容遥控器.html"
         },
         {
