@@ -9,8 +9,8 @@
         {
             "key": "tmdb兼容",
             "name": "♫『TMDB电视兼容』[HTML]",
-            "api": "csp_1233",
-            "homePage": "./html/tmdb电视兼容遥控器.html"
+            "api": "csp_tmdbtui",
+            "homePage": "./html/tmdb推荐推.html"
         },
         {
             "key": "豆瓣",
