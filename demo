@@ -7,6 +7,12 @@
     "danmaku": "http://127.0.0.1:9978/proxy?do=danmaku&name={name}&episode={episode}",
     "sites": [
         {
+            "key": "tmdb兼容",
+            "name": "♫『TMDB电视兼容』[HTML]",
+            "api": "csp_LocalFile"
+            "homePage": "./html/tmdb电视兼容遥控器.html"
+        },
+        {
             "key": "豆瓣",
             "name": "♫『豆瓣｜首页』[首页]",
             "type": 3,
